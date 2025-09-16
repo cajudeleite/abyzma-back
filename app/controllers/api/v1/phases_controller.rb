@@ -11,8 +11,8 @@ class Api::V1::PhasesController < ApplicationController
 
     render json: { 
       tickets_left:, 
-      phase_ticket_amount: phase.ticket_amount,
-      phase_name: phase.name
+      ticket_amount: phase.ticket_amount,
+      name: phase.name
     }, status: :ok
   end
 end
