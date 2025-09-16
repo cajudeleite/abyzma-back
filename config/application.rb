@@ -28,5 +28,16 @@ module AbyzmaBack
     config.generators do |g|
       g.orm :active_record, primary_key_type: :uuid
     end
+    
+    # Configure CORS
+    config.middleware.insert_before 0, Rack::Cors do
+      allow do
+        origins 'http://localhost:5173' # Your frontend URL
+        resource '*',
+          headers: :any,
+          methods: [:get, :post, :put, :patch, :delete, :options, :head],
+          credentials: true
+      end
+    end
   end
 end

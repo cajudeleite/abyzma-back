@@ -4,6 +4,7 @@ class CreatePhases < ActiveRecord::Migration[7.2]
       t.string :name
       t.integer :price
       t.integer :ticket_amount
+      t.boolean :active, default: false
       t.date :start_date
       t.date :end_date
 

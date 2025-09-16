@@ -30,6 +30,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_09_15_235852) do
     t.string "name"
     t.integer "price"
     t.integer "ticket_amount"
+    t.boolean "active", default: false
     t.date "start_date"
     t.date "end_date"
     t.datetime "created_at", null: false
