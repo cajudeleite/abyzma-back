@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  phase: one
+  cupon: one
+  client_name: MyString
+  client_email: MyString
+  payment_id: MyString
+  price: 1
+
+two:
+  phase: two
+  cupon: two
+  client_name: MyString
+  client_email: MyString
+  payment_id: MyString
+  price: 1
