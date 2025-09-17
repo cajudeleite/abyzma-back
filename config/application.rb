@@ -39,5 +39,11 @@ module AbyzmaBack
           credentials: true
       end
     end
+    
+    # Configure Stripe
+    config.stripe = {
+      secret_key: Rails.application.credentials.stripe[:secret_key],
+      publishable_key: Rails.application.credentials.stripe[:publishable_key]
+    }
   end
 end

@@ -1,4 +1,4 @@
-class Api::V1::PhasesController < ApplicationController
+class Api::V1::PhasesController < Api::V1::BaseController
   def current_phase
     # Find the current active phase
     phase = Phase.find_by(active: true)
