@@ -15,4 +15,18 @@ class Api::V1::PhasesController < Api::V1::BaseController
       name: phase.name
     }, status: :ok
   end
+
+  def index
+    phases = Phase.all.order(created_at: :asc)
+
+    render json: { 
+      phases: phases.map { |phase| 
+        { 
+          name: phase.name, 
+          price: phase.price, 
+          active: phase.active 
+        } 
+      } 
+    }, status: :ok
+  end
 end

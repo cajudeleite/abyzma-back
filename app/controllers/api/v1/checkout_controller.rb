@@ -1,5 +1,13 @@
 class Api::V1::CheckoutController < Api::V1::BaseController
 	def create
+		phase = Phase.find_by(active: true)
+
+		if phase.nil?
+			return render json: { error: "No active phase found" }, status: :not_found
+		end
+
+		quantity = params[:quantity] || 1
+
 		begin
 			# Set Stripe API key
 			Stripe.api_key = Rails.application.credentials.stripe[:secret_key]
@@ -10,12 +18,12 @@ class Api::V1::CheckoutController < Api::V1::BaseController
 					price_data: {
 						currency: 'eur',
 						product_data: {
-							name: 'Abyzma Ticket',
+							name: "Abyzma Ticket #{phase.name}",
 							description: 'Ticket for the event',
 						},
-						unit_amount: 2000, # 20.00 in cents
+						unit_amount: phase.price * 100, # 20.00 in cents
 					},
-					quantity: 1,
+					quantity: quantity,
 					}],
 					mode: 'payment',
 					success_url: "#{request.base_url}/checkout?success=true",

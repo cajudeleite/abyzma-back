@@ -20,6 +20,7 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       get "phases/current", to: "phases#current_phase"
+      get "phases", to: "phases#index"
       post '/create-checkout-session', to: 'checkout#create'
     end
   end
