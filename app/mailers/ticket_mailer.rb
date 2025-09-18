@@ -9,7 +9,7 @@ class TicketMailer < ApplicationMailer
     
     # Generate QR codes and attach them as inline images
     @tickets.each_with_index do |ticket, index|
-      qr_png = generate_qr_code_png(ticket.uuid)
+      qr_png = generate_qr_code_png(ticket.id)
       attachments["qr_code_#{index + 1}.png"] = qr_png
     end
     
@@ -21,11 +21,11 @@ class TicketMailer < ApplicationMailer
 
   private
 
-  def generate_qr_code_png(uuid)
+  def generate_qr_code_png(ticket_id)
     require 'rqrcode'
     require 'chunky_png'
     
-    qr = RQRCode::QRCode.new(uuid)
+    qr = RQRCode::QRCode.new(ticket_id)
     
     # Generate QR code as PNG
     qr_png = qr.as_png(
