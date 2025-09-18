@@ -18,7 +18,8 @@
 Rails.application.configure do
   # Ensure webhook secret is configured
   if Rails.env.production?
-    unless Rails.application.credentials.stripe&.dig(:webhook_secret)
+    webhook_secret = Rails.application.credentials.stripe&.dig(:webhook_secret) || ENV['STRIPE_WEBHOOK_SECRET']
+    unless webhook_secret.present?
       Rails.logger.warn "Stripe webhook secret not configured. Webhooks will not be verified."
     end
   end
