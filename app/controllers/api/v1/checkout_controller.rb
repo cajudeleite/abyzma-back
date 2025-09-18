@@ -17,7 +17,7 @@ class Api::V1::CheckoutController < Api::V1::BaseController
 
 		begin
 			# Set Stripe API key
-			Stripe.api_key = Rails.application.credentials.stripe[:secret_key]
+			Stripe.api_key = Rails.application.credentials.stripe&.dig(:secret_key) || ENV['STRIPE_SECRET_KEY']
 
 			session = Stripe::Checkout::Session.create({
 				payment_method_types: ['card'],

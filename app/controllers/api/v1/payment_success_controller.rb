@@ -5,7 +5,7 @@ class Api::V1::PaymentSuccessController < Api::V1::BaseController
     if session_id.present?
       begin
         # Retrieve the session from Stripe to get payment details
-        Stripe.api_key = Rails.application.credentials.stripe[:secret_key]
+        Stripe.api_key = Rails.application.credentials.stripe&.dig(:secret_key) || ENV['STRIPE_SECRET_KEY']
         session = Stripe::Checkout::Session.retrieve(session_id)
         
         # Get the tickets created for this session
