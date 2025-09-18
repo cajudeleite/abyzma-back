@@ -38,6 +38,9 @@ class Api::V1::CheckoutController < Api::V1::BaseController
 					quantity: quantity,
 				}],
 				mode: 'payment',
+				payment_intent_data: {
+					capture_method: 'automatic'
+				},
 				success_url: "http://localhost:5173/checkout?success=true&session_id={CHECKOUT_SESSION_ID}",
 				cancel_url: "http://localhost:5173/checkout?canceled=true",
 				metadata: {
