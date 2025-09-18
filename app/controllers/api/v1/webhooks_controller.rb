@@ -1,17 +1,36 @@
 class Api::V1::WebhooksController < Api::V1::BaseController
   # CSRF protection is already disabled in BaseController
   
+  def test
+    # Simple test endpoint to verify webhook configuration
+    render json: {
+      status: 'ok',
+      webhook_secret_configured: (Rails.application.credentials.stripe&.dig(:webhook_secret) || ENV['STRIPE_WEBHOOK_SECRET']).present?,
+      stripe_secret_configured: (Rails.application.credentials.stripe&.dig(:secret_key) || ENV['STRIPE_SECRET_KEY']).present?,
+      environment: Rails.env
+    }
+  end
+  
   def stripe
     payload = request.body.read
     sig_header = request.env['HTTP_STRIPE_SIGNATURE']
     endpoint_secret = Rails.application.credentials.stripe&.dig(:webhook_secret) || ENV['STRIPE_WEBHOOK_SECRET']
     
+    # Log webhook debugging info
+    Rails.logger.info "Webhook received - Signature header present: #{sig_header.present?}"
+    Rails.logger.info "Webhook secret configured: #{endpoint_secret.present?}"
+    
     begin
       event = Stripe::Webhook.construct_event(payload, sig_header, endpoint_secret)
+      Rails.logger.info "Webhook signature verified successfully for event: #{event.type}"
     rescue JSON::ParserError => e
+      Rails.logger.error "Webhook JSON parse error: #{e.message}"
       render json: { error: 'Invalid payload' }, status: 400
       return
     rescue Stripe::SignatureVerificationError => e
+      Rails.logger.error "Webhook signature verification failed: #{e.message}"
+      Rails.logger.error "Expected signature header: #{sig_header}"
+      Rails.logger.error "Webhook secret: #{endpoint_secret.present? ? 'SET' : 'NOT SET'}"
       render json: { error: 'Invalid signature' }, status: 400
       return
     end

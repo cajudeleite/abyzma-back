@@ -25,6 +25,7 @@ Rails.application.routes.draw do
       get "phases", to: "phases#index"
       post '/create-checkout-session', to: 'checkout#create'
       post '/webhooks/stripe', to: 'webhooks#stripe'
+      get '/webhooks/test', to: 'webhooks#test'
       get '/payment-success', to: 'payment_success#show'
     end
   end
