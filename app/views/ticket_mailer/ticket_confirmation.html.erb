@@ -184,13 +184,16 @@
                   <p class="ticket-id">Ticket ID: <%= ticket.id %></p>
                 </div>
                 <div class="price">
-                  $<%= ticket.price / 100.0 %>
+                  <%= ticket.price %>€
                 </div>
               </div>
             </div>
             <div class="qr-section">
               <div class="qr-code">
-                <img src="<%= qr_code_data_uri(ticket.id) %>" alt="QR Code for Ticket <%= ticket.id %>" style="max-width: 150px; height: auto;">
+                <img src="cid:<%= qr_code_cid(index) %>" alt="QR Code for Ticket <%= ticket.id %>" style="max-width: 150px; height: auto;">
+              </div>
+              <div class="qr-label">
+                QR Code for Ticket <%= ticket.id %>
               </div>
               <div class="qr-label">
                 Scan this QR code at the venue for entry

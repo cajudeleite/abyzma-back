@@ -13,7 +13,7 @@ TICKET <%= index + 1 %>:
 -----------------
 Phase: <%= ticket.phase.name %>
 Ticket ID: <%= ticket.id %>
-Price: $<%= ticket.price / 100.0 %>
+Price: <%= ticket.price %>€
 QR Code Data: <%= ticket.id %>
 
 <% end %>

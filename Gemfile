@@ -29,6 +29,7 @@ gem "stripe"
 
 # QR Code generation for tickets
 gem "rqrcode"
+gem "chunky_png"
 
 # Use Kredis to get higher-level data types in Redis [https://github.com/rails/kredis]
 # gem "kredis"
