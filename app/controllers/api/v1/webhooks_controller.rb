@@ -12,6 +12,9 @@ class Api::V1::WebhooksController < Api::V1::BaseController
   end
   
   def stripe
+    # Log webhook debugging info first
+    Rails.logger.info "Webhook received - Processing started"
+    
     payload = request.body.read
     sig_header = request.env['HTTP_STRIPE_SIGNATURE']
     endpoint_secret = Rails.application.credentials.stripe&.dig(:webhook_secret) || ENV['STRIPE_WEBHOOK_SECRET']
@@ -19,6 +22,25 @@ class Api::V1::WebhooksController < Api::V1::BaseController
     # Log webhook debugging info
     Rails.logger.info "Webhook received - Signature header present: #{sig_header.present?}"
     Rails.logger.info "Webhook secret configured: #{endpoint_secret.present?}"
+    Rails.logger.info "Payload length: #{payload.length}"
+    
+    if payload.blank?
+      Rails.logger.error "Webhook payload is blank or empty"
+      render json: { error: 'Empty payload' }, status: 400
+      return
+    end
+    
+    if sig_header.blank?
+      Rails.logger.error "Webhook signature header is missing"
+      render json: { error: 'Missing signature header' }, status: 400
+      return
+    end
+    
+    if endpoint_secret.blank?
+      Rails.logger.error "Webhook secret is not configured"
+      render json: { error: 'Webhook secret not configured' }, status: 400
+      return
+    end
     
     begin
       event = Stripe::Webhook.construct_event(payload, sig_header, endpoint_secret)
