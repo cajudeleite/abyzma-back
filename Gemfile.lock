@@ -384,6 +384,7 @@ DEPENDENCIES
   bootsnap
   brakeman
   capybara
+  chunky_png
   debug
   importmap-rails
   jbuilder
