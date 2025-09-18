@@ -32,7 +32,7 @@ module AbyzmaBack
     # Configure CORS
     config.middleware.insert_before 0, Rack::Cors do
       allow do
-        origins 'http://localhost:5173' # Your frontend URL
+        origins 'http://localhost:5173', ENV['HOST'] # Your frontend URL
         resource '*',
           headers: :any,
           methods: [:get, :post, :put, :patch, :delete, :options, :head],
