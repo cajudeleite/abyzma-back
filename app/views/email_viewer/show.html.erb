@@ -1,0 +1,25 @@
+<div style="max-width: 1000px; margin: 0 auto; padding: 20px;">
+  <%= link_to "← Back to Email List", email_viewer_index_path, 
+      style: "color: #007bff; text-decoration: none; margin-bottom: 20px; display: inline-block;" %>
+  
+  <h2>📧 Email Preview</h2>
+  
+  <div style="border: 1px solid #ddd; border-radius: 5px; overflow: hidden;">
+    <div style="background: #f8f9fa; padding: 10px; border-bottom: 1px solid #ddd;">
+      <strong>Email Content:</strong>
+    </div>
+    <div style="padding: 0;">
+      <%= raw @email_content %>
+    </div>
+  </div>
+  
+  <div style="margin-top: 20px; padding: 15px; background: #e3f2fd; border-radius: 5px;">
+    <h4>📋 Email Testing Notes:</h4>
+    <ul>
+      <li>This email was generated with QR codes for each ticket</li>
+      <li>QR codes contain the ticket UUID for validation</li>
+      <li>The email template is responsive and works on all devices</li>
+      <li>In production, this email will be sent to the customer's email address</li>
+    </ul>
+  </div>
+</div>

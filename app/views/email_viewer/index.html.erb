@@ -1,0 +1,30 @@
+<div style="max-width: 800px; margin: 0 auto; padding: 20px;">
+  <h1>📧 Email Viewer</h1>
+  <p>View your test emails with QR codes:</p>
+  
+  <% if @email_dirs.any? %>
+    <div class="email-list">
+      <% @email_dirs.each do |email_dir| %>
+        <% dir_name = File.basename(email_dir) %>
+        <% timestamp = File.mtime(email_dir).strftime("%Y-%m-%d %H:%M:%S") %>
+        <div style="border: 1px solid #ddd; margin: 10px 0; padding: 15px; border-radius: 5px;">
+          <h3>Email sent: <%= timestamp %></h3>
+          <p>Directory: <%= dir_name %></p>
+          <%= link_to "View Email", email_viewer_show_path(id: dir_name), 
+              class: "btn btn-primary", 
+              style: "background: #007bff; color: white; padding: 8px 16px; text-decoration: none; border-radius: 4px;" %>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <p>No emails found. Send a test email first!</p>
+    <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
+      <h4>How to test:</h4>
+      <ol>
+        <li>Open Rails console: <code>rails console</code></li>
+        <li>Run: <code>TicketMailer.ticket_confirmation(Ticket.includes(:phase).limit(2)).deliver_now</code></li>
+        <li>Refresh this page</li>
+      </ol>
+    </div>
+  <% end %>
+</div>

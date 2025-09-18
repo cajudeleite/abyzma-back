@@ -1,0 +1,36 @@
+🎫 YOUR ABYZMA TICKETS
+========================
+
+Hello <%= @client_name %>,
+
+Thank you for your purchase! Your tickets have been successfully generated and are ready for use.
+
+YOUR TICKETS:
+=============
+
+<% @tickets.each_with_index do |ticket, index| %>
+TICKET <%= index + 1 %>:
+-----------------
+Phase: <%= ticket.phase.name %>
+Ticket ID: <%= ticket.id %>
+Price: $<%= ticket.price / 100.0 %>
+QR Code Data: <%= ticket.id %>
+
+<% end %>
+
+IMPORTANT INSTRUCTIONS:
+======================
+- Present the QR code on your ticket at the venue entrance
+- Each QR code is unique and can only be used once  
+- Keep this email safe as it contains your tickets
+- Arrive early to avoid delays
+- Contact us if you have any questions
+
+We look forward to seeing you at the event!
+
+Best regards,
+The Abyzma Team
+
+---
+This email was sent to <%= @client_email %> regarding your ticket purchase.
+If you have any questions, please contact our support team.

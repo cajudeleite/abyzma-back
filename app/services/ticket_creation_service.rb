@@ -34,6 +34,9 @@ class TicketCreationService
         end
       end
 
+      # Send confirmation email with tickets
+      send_ticket_confirmation_email(tickets) if tickets.any?
+
       { success: true, tickets: tickets, count: tickets.length }
     rescue StandardError => e
       Rails.logger.error "Error creating tickets: #{e.message}"
@@ -99,5 +102,15 @@ class TicketCreationService
 
   def payment_intent_id
     @session_data['payment_intent']
+  end
+
+  def send_ticket_confirmation_email(tickets)
+    begin
+      TicketMailer.ticket_confirmation(tickets).deliver_now
+      Rails.logger.info "Ticket confirmation email sent to #{tickets.first.client_email} for #{tickets.length} tickets"
+    rescue StandardError => e
+      Rails.logger.error "Failed to send ticket confirmation email: #{e.message}"
+      # Don't fail the entire ticket creation process if email fails
+    end
   end
 end

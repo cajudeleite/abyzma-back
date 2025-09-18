@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  get "email_viewer/index"
+  get "email_viewer/:id", to: "email_viewer#show", as: "email_viewer_show"
   namespace :admin do
       resources :cupons
       resources :phases
