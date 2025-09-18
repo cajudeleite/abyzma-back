@@ -41,7 +41,7 @@ class Api::V1::CheckoutController < Api::V1::BaseController
 				payment_intent_data: {
 					capture_method: 'automatic'
 				},
-				success_url: "http://localhost:5173/checkout?success=true&session_id={CHECKOUT_SESSION_ID}",
+				success_url: "http://localhost:5173/success?session_id={CHECKOUT_SESSION_ID}",
 				cancel_url: "http://localhost:5173/checkout?canceled=true",
 				metadata: {
 					phase_id: phase.id,
