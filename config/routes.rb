@@ -27,6 +27,7 @@ Rails.application.routes.draw do
       post '/webhooks/stripe', to: 'webhooks#stripe'
       get '/webhooks/test', to: 'webhooks#test'
       get '/payment-success', to: 'payment_success#show'
+      get '/cupon/:cupon_code', to: 'cupon#show'
     end
   end
 
