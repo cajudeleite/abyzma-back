@@ -64,8 +64,8 @@ class Api::V1::CheckoutController < Api::V1::BaseController
 				payment_intent_data: {
 					capture_method: 'automatic'
 				},
-				success_url: "#{ENV['HOST'] || "https://05000db9eec4.ngrok-free.app"}/success?session_id={CHECKOUT_SESSION_ID}",
-				cancel_url: "#{ENV['HOST'] || "https://05000db9eec4.ngrok-free.app"}/checkout?canceled=true",
+				success_url: "#{ENV['HOST']}/success?session_id={CHECKOUT_SESSION_ID}",
+				cancel_url: "#{ENV['HOST']}/checkout?canceled=true",
 				metadata: {
 					phase_id: phase.id,
 					phase_name: phase.name,
