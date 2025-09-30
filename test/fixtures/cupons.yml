@@ -1,17 +1,41 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-one:
-  name: MyString
+fixed_discount_active:
+  name: "SAVE10"
   percentage: false
-  active: false
-  value: MyString
-  amount: MyString
-  end_date: 2025-09-15
+  active: true
+  value: 10
+  amount: 5
+  end_date: 2025-12-31
 
-two:
-  name: MyString
+percentage_discount_active:
+  name: "DISCOUNT20"
+  percentage: true
+  active: true
+  value: 20
+  amount: 3
+  end_date: 2025-12-31
+
+expired_cupon:
+  name: "EXPIRED"
+  percentage: false
+  active: true
+  value: 15
+  amount: 2
+  end_date: 2024-12-31
+
+inactive_cupon:
+  name: "INACTIVE"
   percentage: true
   active: false
-  value: MyString
-  amount: MyString
-  end_date: 2025-09-15
+  value: 25
+  amount: 1
+  end_date: 2025-12-31
+
+zero_amount_cupon:
+  name: "SOLD_OUT"
+  percentage: false
+  active: true
+  value: 5
+  amount: 0
+  end_date: 2025-12-31

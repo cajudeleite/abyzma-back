@@ -18,6 +18,11 @@ class Api::V1::CheckoutController < Api::V1::BaseController
 
 		cupon = find_cupon(cupon_code) if cupon_code
 
+		# If a coupon code was provided but no valid coupon was found, return error
+		if cupon_code.present? && cupon.nil?
+			return render json: { error: "There aren't enough available cupons for that quantity of tickets" }, status: :bad_request
+		end
+
 		if cupon && cupon.amount < quantity
 			return render json: { error: "There aren't enough available cupons for that quantity of tickets" }, status: :bad_request
 		end
@@ -83,6 +88,6 @@ class Api::V1::CheckoutController < Api::V1::BaseController
 	private
 
 	def find_cupon(name)
-		Cupon.find_by(name:, active: true)
+		Cupon.available.find_by(name: name)
 	end
 end

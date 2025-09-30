@@ -22,16 +22,21 @@ class TicketCreationService
         end
       else
         # Fallback to line items method
-        line_items = fetch_line_items
-        line_items.each do |line_item|
-          phase = find_phase_for_line_item(line_item)
-          next unless phase
+        begin
+          line_items = fetch_line_items
+          line_items.each do |line_item|
+            phase = find_phase_for_line_item(line_item)
+            next unless phase
 
-          quantity = line_item.quantity
-          quantity.times do
-            ticket = create_single_ticket(phase, line_item, cupon)
-            tickets << ticket if ticket
+            quantity = line_item.quantity
+            quantity.times do
+              ticket = create_single_ticket(phase, line_item, cupon)
+              tickets << ticket if ticket
+            end
           end
+        rescue StandardError => e
+          Rails.logger.warn "Failed to fetch line items: #{e.message}"
+          # Continue with empty tickets array
         end
       end
 
@@ -65,7 +70,7 @@ class TicketCreationService
     cupon_code = @session_data.dig('metadata', :cupon_code)
     return nil unless cupon_code.present?
     
-    Cupon.find_by(name: cupon_code, active: true)
+    Cupon.available.find_by(name: cupon_code)
   end
 
   def fetch_line_items
