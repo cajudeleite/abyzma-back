@@ -209,4 +209,60 @@ class CheckoutControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
   end
+
+  test "should create tickets immediately for 0 euro checkout" do
+    # Use a coupon that makes the price 0 (100% discount)
+    cupon = Cupon.create!(name: "FREE100", value: 100, percentage: true, amount: 10, active: true, end_date: 1.year.from_now)
+    
+    params = {
+      email: "test@example.com",
+      name: "Test User",
+      quantity: 2,
+      cuponCode: "FREE100"
+    }
+    
+    post "/api/v1/create-checkout-session", params: params
+    
+    assert_response :success
+    
+    response_data = JSON.parse(response.body)
+    assert_equal true, response_data["success"]
+    assert_equal "Free tickets created successfully", response_data["message"]
+    assert_equal 2, response_data["tickets"].length
+    
+    # Verify tickets were created in database
+    tickets = Ticket.where(client_email: "test@example.com")
+    assert_equal 2, tickets.count
+    assert_equal 0, tickets.first.price
+    assert_equal 0, tickets.last.price
+    assert tickets.first.payment_id.start_with?("free_")
+    assert tickets.last.payment_id.start_with?("free_")
+  end
+
+  test "should create tickets immediately for 0 euro checkout with free phase" do
+    # Deactivate the existing active phase and create a new one with 0 price
+    @phase.update!(active: false)
+    phase = Phase.create!(name: "Free Phase", price: 0, active: true, start_date: 1.year.ago, end_date: 1.year.from_now)
+    
+    params = {
+      email: "test@example.com",
+      name: "Test User",
+      quantity: 1
+    }
+    
+    post "/api/v1/create-checkout-session", params: params
+    
+    assert_response :success
+    
+    response_data = JSON.parse(response.body)
+    assert_equal true, response_data["success"]
+    assert_equal "Free tickets created successfully", response_data["message"]
+    assert_equal 1, response_data["tickets"].length
+    
+    # Verify ticket was created in database
+    ticket = Ticket.find_by(client_email: "test@example.com")
+    assert_not_nil ticket
+    assert_equal 0, ticket.price
+    assert_nil ticket.cupon
+  end
 end

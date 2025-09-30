@@ -38,50 +38,92 @@ class Api::V1::CheckoutController < Api::V1::BaseController
 			unit_amount_cents = discount_cents
 		end
 
-		begin
-			# Set Stripe API key
-			Stripe.api_key = Rails.application.credentials.stripe&.dig(:secret_key) || ENV['STRIPE_SECRET_KEY']
+		# Handle 0 euro checkouts - create tickets immediately
+		if unit_amount_cents == 0
+			begin
+				# Create tickets directly for 0 euro checkouts
+				tickets = []
+				quantity.times do
+					ticket = Ticket.create!(
+						phase: phase,
+						cupon: cupon,
+						client_name: customer_name,
+						client_email: customer_email,
+						payment_id: "free_#{SecureRandom.hex(8)}", # Generate unique ID for free tickets
+						price: 0
+					)
+					tickets << ticket
+				end
 
-			session = Stripe::Checkout::Session.create({
-				payment_method_types: ['card'],
-				customer_email: customer_email,
-				line_items: [{
-					price_data: {
-						currency: 'eur',
-						product_data: {
-							name: "Abyzma Ticket #{phase.name}",
-							description: "Ticket for #{phase.name} phase",
-							metadata: {
-								phase_id: phase.id,
-								phase_name: phase.name
-							}
-						},
-						unit_amount: unit_amount_cents, # Already in cents (discount applied if any)
-					},
-					quantity: quantity,
-				}],
-				mode: 'payment',
-				payment_intent_data: {
-					capture_method: 'automatic'
-				},
-				success_url: "#{ENV['HOST']}/success?session_id={CHECKOUT_SESSION_ID}",
-				cancel_url: "#{ENV['HOST']}/checkout?canceled=true",
-				metadata: {
-					phase_id: phase.id,
-					phase_name: phase.name,
-					customer_name: customer_name,
-					customer_email: customer_email,
-					quantity: quantity,
-					cupon_code: cupon_code
+				# Decrement coupon amount if coupon was used
+				if cupon && tickets.any?
+					new_amount = [cupon.amount - tickets.length, 0].max
+					cupon.update!(amount: new_amount, active: new_amount != 0)
+				end
+
+				# Send confirmation email with tickets
+				begin
+					TicketMailer.ticket_confirmation(tickets).deliver_now
+					Rails.logger.info "Free ticket confirmation email sent to #{customer_email} for #{tickets.length} tickets"
+				rescue StandardError => e
+					Rails.logger.error "Failed to send ticket confirmation email: #{e.message}"
+				end
+
+				render json: { 
+					success: true,
+					message: "Free tickets created successfully",
+					tickets: tickets.map { |t| { id: t.id, price: t.price } }
 				}
-			})
-				
-			render json: { 
-				checkoutUrl: session.url,
-				sessionId: session.id
-			}
-		rescue Stripe::StripeError => e
-			render json: { error: e.message }, status: 400
+			rescue StandardError => e
+				render json: { error: "Failed to create free tickets: #{e.message}" }, status: 500
+			end
+		else
+			# Handle paid checkouts through Stripe
+			begin
+				# Set Stripe API key
+				Stripe.api_key = Rails.application.credentials.stripe&.dig(:secret_key) || ENV['STRIPE_SECRET_KEY']
+
+				session = Stripe::Checkout::Session.create({
+					payment_method_types: ['card'],
+					customer_email: customer_email,
+					line_items: [{
+						price_data: {
+							currency: 'eur',
+							product_data: {
+								name: "Abyzma Ticket #{phase.name}",
+								description: "Ticket for #{phase.name} phase",
+								metadata: {
+									phase_id: phase.id,
+									phase_name: phase.name
+								}
+							},
+							unit_amount: unit_amount_cents, # Already in cents (discount applied if any)
+						},
+						quantity: quantity,
+					}],
+					mode: 'payment',
+					payment_intent_data: {
+						capture_method: 'automatic'
+					},
+					success_url: "#{ENV['HOST']}/success?session_id={CHECKOUT_SESSION_ID}",
+					cancel_url: "#{ENV['HOST']}/checkout?canceled=true",
+					metadata: {
+						phase_id: phase.id,
+						phase_name: phase.name,
+						customer_name: customer_name,
+						customer_email: customer_email,
+						quantity: quantity,
+						cupon_code: cupon_code
+					}
+				})
+					
+				render json: { 
+					checkoutUrl: session.url,
+					sessionId: session.id
+				}
+			rescue Stripe::StripeError => e
+				render json: { error: e.message }, status: 400
+			end
 		end
 	end
 

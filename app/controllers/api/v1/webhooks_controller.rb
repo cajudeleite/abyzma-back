@@ -73,12 +73,25 @@ class Api::V1::WebhooksController < Api::V1::BaseController
 
   def handle_checkout_session_completed(session)
     Rails.logger.info "Processing checkout session completed: #{session.id}"
+    
+    # Skip processing for free tickets (they don't go through Stripe checkout)
+    if session.metadata&.dig('free_ticket') == 'true'
+      Rails.logger.info "Skipping checkout session #{session.id} - appears to be a free ticket"
+      return
+    end
+    
     # Tickets will be created when payment_intent.succeeded fires (after capture)
     # This handles async payment methods where capture happens after session completion
   end
 
   def handle_payment_intent_succeeded(payment_intent)
     Rails.logger.info "Payment intent succeeded: #{payment_intent.id}"
+    
+    # Skip processing for free tickets (they have payment_id starting with "free_")
+    if payment_intent.id.start_with?('free_')
+      Rails.logger.info "Skipping payment intent #{payment_intent.id} - appears to be a free ticket"
+      return
+    end
     
     # Check if tickets already exist for this payment intent to prevent duplicates
     existing_tickets = Ticket.where(payment_id: payment_intent.id)
