@@ -13,7 +13,7 @@ class CuponDashboard < Administrate::BaseDashboard
     amount: Field::String,
     end_date: Field::Date,
     name: Field::String,
-    type: Field::String,
+    percentage: Field::Boolean,
     value: Field::String,
     created_at: Field::DateTime,
     updated_at: Field::DateTime,
@@ -39,7 +39,7 @@ class CuponDashboard < Administrate::BaseDashboard
     amount
     end_date
     name
-    type
+    percentage
     value
     created_at
     updated_at
@@ -53,7 +53,7 @@ class CuponDashboard < Administrate::BaseDashboard
     amount
     end_date
     name
-    type
+    percentage
     value
   ].freeze
 

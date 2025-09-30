@@ -10,20 +10,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_09_15_235852) do
+ActiveRecord::Schema[7.2].define(version: 2025_09_30_211000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
   enable_extension "uuid-ossp"
 
   create_table "cupons", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "name"
-    t.string "type"
     t.boolean "active", default: false
-    t.string "value"
-    t.string "amount"
+    t.integer "value"
+    t.integer "amount"
     t.date "end_date"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "percentage", default: false, null: false
   end
 
   create_table "phases", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

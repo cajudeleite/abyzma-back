@@ -2,7 +2,7 @@
 
 one:
   name: MyString
-  type: 
+  percentage: false
   active: false
   value: MyString
   amount: MyString
@@ -10,7 +10,7 @@ one:
 
 two:
   name: MyString
-  type: 
+  percentage: true
   active: false
   value: MyString
   amount: MyString

@@ -9,14 +9,15 @@ class TicketCreationService
     begin
       tickets = []
       
-      # Get phase from metadata first (more reliable)
+      # Get phase and coupon from metadata first (more reliable)
       phase = find_phase_from_metadata
+      cupon = find_cupon_from_metadata
       
       if phase
         # Create tickets based on quantity from metadata
         quantity = @session_data.dig('metadata', :quantity)&.to_i || 1
         quantity.times do
-          ticket = create_single_ticket(phase)
+          ticket = create_single_ticket(phase, nil, cupon)
           tickets << ticket if ticket
         end
       else
@@ -28,11 +29,14 @@ class TicketCreationService
 
           quantity = line_item.quantity
           quantity.times do
-            ticket = create_single_ticket(phase, line_item)
+            ticket = create_single_ticket(phase, line_item, cupon)
             tickets << ticket if ticket
           end
         end
       end
+
+      # Decrement coupon amount if coupon was used
+      decrement_cupon_amount(cupon, tickets.length) if cupon && tickets.any?
 
       # Send confirmation email with tickets
       send_ticket_confirmation_email(tickets) if tickets.any?
@@ -55,6 +59,13 @@ class TicketCreationService
     return nil unless phase_id.present?
     
     Phase.find_by(id: phase_id, active: true)
+  end
+
+  def find_cupon_from_metadata
+    cupon_code = @session_data.dig('metadata', :cupon_code)
+    return nil unless cupon_code.present?
+    
+    Cupon.find_by(name: cupon_code, active: true)
   end
 
   def fetch_line_items
@@ -82,13 +93,17 @@ class TicketCreationService
     description.gsub('Abyzma Ticket ', '')
   end
 
-  def create_single_ticket(phase, line_item = nil)
+  def create_single_ticket(phase, line_item = nil, cupon = nil)
+    # Calculate final price (discounted if coupon is present)
+    final_price = calculate_final_price(phase.price, cupon)
+    
     Ticket.create!(
       phase: phase,
+      cupon: cupon,
       client_name: customer_name,
       client_email: customer_email,
       payment_id: payment_intent_id,
-      price: phase.price
+      price: final_price
     )
   end
 
@@ -102,6 +117,28 @@ class TicketCreationService
 
   def payment_intent_id
     @session_data['payment_intent']
+  end
+
+  def calculate_final_price(original_price, cupon)
+    return original_price unless cupon
+    
+    if cupon.percentage
+      # Apply percentage discount
+      discount_amount = (original_price * (1 - (cupon.value.to_i / 100.0))).round
+    else
+      # Apply fixed amount discount
+      cupon.value
+    end
+  end
+
+  def decrement_cupon_amount(cupon, ticket_count)
+    return unless cupon && ticket_count > 0
+    
+    # Decrement the coupon amount by the number of tickets created
+    new_amount = [cupon.amount - ticket_count, 0].max
+    cupon.update!(amount: new_amount, active: new_amount != 0)
+    
+    Rails.logger.info "Decremented coupon '#{cupon.name}' amount by #{ticket_count}. New amount: #{new_amount}"
   end
 
   def send_ticket_confirmation_email(tickets)
