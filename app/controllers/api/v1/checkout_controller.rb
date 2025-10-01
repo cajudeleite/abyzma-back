@@ -72,7 +72,7 @@ class Api::V1::CheckoutController < Api::V1::BaseController
 				render json: { 
 					success: true,
 					message: "Free tickets created successfully",
-					tickets: tickets.map { |t| { id: t.id, price: t.price } }
+					checkoutUrl: "#{ENV['HOST']}/success?session_id=free"
 				}
 			rescue StandardError => e
 				render json: { error: "Failed to create free tickets: #{e.message}" }, status: 500
